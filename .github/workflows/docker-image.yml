@@ -1,5 +1,5 @@
 name: Docker Image CI
-# Maybe now
+
 on:
   push:
     branches: ["main"]
@@ -37,11 +37,28 @@ jobs:
         id: push
         uses: docker/build-push-action@v5
         with:
-          context: ./
           file: ./apps/web/Dockerfile
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            APP_VERSION=${{ github.ref_name }}
+            SELF_HOSTED=true
+
+      # - name: Build and Push Multi-Arch Image
+      #   id: build
+      #   uses: docker/build-push-action@v5
+      #   with:
+      #     file: ./apps/web/Dockerfile
+      #     platforms: ${{ matrix.platform }}
+      #     labels: ${{ steps.meta.outputs.labels }}
+      #     outputs: >
+      #       type=image,"name=${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_IMAGE_NAME }}",
+      #       push-by-digest=true,name-canonical=true,push=true
+      #     build-args: |
+      #       APP_VERSION=${{ github.ref_name }}
+      #       SELF_HOSTED=true
+
       - name: Generate artifact attestation
         uses: actions/attest-build-provenance@v3
         with:
